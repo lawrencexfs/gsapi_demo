@@ -25,14 +25,6 @@
 
 #define  NameSize (1024)
 int nTime = 5;
-// #define  PageSize (1024*1024)            /*4K*/
-// int nPageSize = 1024*1024;
-// #define  COUNT  ((1024*1024)/PageSize)         /* 1MB = COUNT * PageSize换算 */
-// int nCOUNT = ((1024*1024)/nPageSize);   
-// #define  STR_LEN  ((PageSize*1024) +1)      /*每次缓存4M有效数据写入文件 ，最后一个字节保证 null-terminated ，不写入文件*/
-
-// char g_strUserFlow[PageSize + 1] ;  /*+1 保证字符 '\0'中止
-
 
 /****************************************************************
 * 功能: diffTime 返回两者时间戳之差 单位 us 
@@ -254,6 +246,7 @@ struct wdata
   double file_rate;
   double api_rate;
 };
+
 struct wdata stat_out;
 
 pthread_mutex_t smutex = PTHREAD_MUTEX_INITIALIZER; 
