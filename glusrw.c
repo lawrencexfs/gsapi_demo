@@ -50,6 +50,7 @@ static const char *pidname = ".glusrw.pid";
 static const char *volname = "test";
 static const char *hostname = "192.168.11.6";
 static const char *wfilename = "/share/";
+char localhost[NameSize] = {0};
 
 double writeFile(int wsize, unsigned long fid)
 {  
@@ -61,7 +62,7 @@ double writeFile(int wsize, unsigned long fid)
     struct timeval struStop;
     char *strData = (char *)malloc(PageSize+1);
     char combineName[NameSize] = {0};
-    sprintf(combineName, "%s%s/wmount.%u",wfilename, volname, fid);
+    sprintf(combineName, "%s%s/wmount.%u.%s",wfilename, volname, fid, localhost);
     printf("writeFile filename: %s. size：%d KB.\n\n", combineName, wsize);
     ulStart = clock();
     gettimeofday(&struStart, NULL);
@@ -93,7 +94,7 @@ double readFile(int wsize, unsigned long fid)
     struct timeval struStop;
     char *strData = (char *)malloc(PageSize+1);
     char combineName[NameSize] = {0};
-    sprintf(combineName, "%s%s/wmount.%u",wfilename, volname, fid);
+    sprintf(combineName, "%s%s/wmount.%u.%s",wfilename, volname, fid, localhost);
     printf("readFile filename: %s. size：%d KB.\n\n", combineName, wsize);
     ulStart = clock();
     gettimeofday(&struStart, NULL);
@@ -128,7 +129,7 @@ double writeApi(int wsize, unsigned long fid)
     const char      *filename = "/wapi";
     char *writebuf = (char *)malloc(PageSize+1);
     char combineName[NameSize] = {0};
-    sprintf(combineName, "%s.%u",filename, fid);
+    sprintf(combineName, "%s.%u.%s",filename, fid, localhost);
     printf("writeApi volname: %s%s. size：%d KB.\n\n", volname, combineName, wsize);
 
     unsigned long  ulStart;
@@ -183,8 +184,8 @@ double readApi(int wsize, unsigned long fid)
     const char      *filename = "/wapi";
     char *writebuf = (char *)malloc(PageSize+1);
     char combineName[NameSize] = {0};
-    sprintf(combineName, "%s.%u",filename, fid);
-    printf("writeApi volname: %s%s. size：%d KB.\n\n", volname, combineName, wsize);
+    sprintf(combineName, "%s.%u.%s",filename, fid, localhost);
+    printf("readApi volname: %s%s. size：%d KB.\n\n", volname, combineName, wsize);
 
     unsigned long  ulStart;
     struct timeval struStart;
@@ -209,7 +210,7 @@ double readApi(int wsize, unsigned long fid)
     gettimeofday(&struStop, NULL);
     double rate = wsize * g_nTime;
     rate = (rate ) / diffTime(struStop, struStart);
-    printf("writeApi:\t %.3lf (clock time), using gsapi \n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
+    printf("readApi:\t %.3lf (clock time), using gsapi \n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
         (double)(clock()-ulStart)/CLOCKS_PER_SEC,
         diffTime(struStop, struStart), 
         rate);
@@ -313,7 +314,7 @@ static void *readTest(void *pmethon)
 }
 
 #define NUMT 4
-
+int getLocalHost();
 int main(int argc, char **argv)
 {
   int curMethon;
@@ -331,7 +332,7 @@ int main(int argc, char **argv)
   int mutinum = 1;
 
   int mode = WriteMode; // 读写模式 默认 0 写， 非0 读
-
+  getLocalHost();
 //   memset(&test, 0, sizeof(test));
 
   while(argc > arg) {
@@ -454,3 +455,22 @@ int main(int argc, char **argv)
   return result;
 }
 
+int getLocalHost(){
+    FILE *fp;
+    char cmd[NameSize] = {0};
+    char *fmt = "hostname";
+  
+    snprintf(cmd, sizeof(cmd), fmt);
+    if((fp = popen(cmd, "r")) == NULL)
+    {
+      perror("Fail to popen\n");
+      return -1;
+    }
+    while(fgets(localhost, sizeof(localhost), fp) != NULL)
+    {
+      printf("localhost: %s", localhost);
+    }
+    localhost[strlen(localhost)-1] = 0;// 删除字符串尾部的换行符
+    pclose(fp);
+    return 0;
+}
