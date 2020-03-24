@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <assert.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -20,8 +19,6 @@
 #include "api/glfs-handles.h"
 #include <pthread.h>
 // using namespace std;
-
-#define WRITE_FILE
 
 #define  NameSize (1024)
 int g_nTime = 5;
@@ -55,7 +52,6 @@ static const char *wfilename = "/share/";
 
 double writeFile(int wsize, unsigned long fid)
 {  
-
     int PageSize = ((wsize * 1024));   
     int i = 0;
     int fd;
@@ -101,7 +97,6 @@ double readFile(int wsize, unsigned long fid)
     ulStart = clock();
     gettimeofday(&struStart, NULL);
     fd = open(combineName, O_CREAT | O_RDWR, 0644);
-
     for (i=0; i < g_nTime; i++)
     {
         int ret = read(fd, strData, PageSize);
@@ -110,7 +105,6 @@ double readFile(int wsize, unsigned long fid)
           break;          
         }
     }
-
     close(fd);
     gettimeofday(&struStop, NULL);
     double rate = wsize * g_nTime;
@@ -201,7 +195,6 @@ double readApi(int wsize, unsigned long fid)
     // assert(fd != NULL);
     fprintf (stderr, "%s: (%p) %s\n", combineName, fd, strerror (errno));
     glfs_lseek (fd, 0, SEEK_SET);
- 
     for (i=0; i < g_nTime; i++)
     {
         ret = glfs_read (fd, writebuf, PageSize, 0);
@@ -276,7 +269,6 @@ static void *writeTest(void *pmethon)
   }
   return ps;
 }
-
 
 static void *readTest(void *pmethon)
 {
