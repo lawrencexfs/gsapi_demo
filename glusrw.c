@@ -160,21 +160,12 @@ double writeApi(int wsize, unsigned long fid)
     assert(fd != NULL);
     fprintf (stderr, "%s: (%p) %s\n", combineName, fd, strerror (errno));
  
-    // fd2 = glfs_open (fsapi, combineName, O_RDWR);
-    // fprintf (stderr, "%s: (%p) %s\n", combineName, fd, strerror (errno));
-
     for (i=0; i < g_nTime; i++)
     {
         ret = glfs_write (fd, writebuf, PageSize, 0);
     }
-
-    // glfs_lseek (fd, 0, SEEK_SET);
-    // ret = glfs_read (fd, readbuf, 32*1024, 0);
-    // printf ("read %d, %s", ret, readbuf);
  
     glfs_close (fd);
-    // glfs_close (fd2);
- 
     // /* Gluster环境释放 */
     // glfs_fini (fsapi);
     gettimeofday(&struStop, NULL);
@@ -237,7 +228,7 @@ enum Method{
    MApi = 2
 };
 
-struct wdata
+struct StatData
 {
   /* data */
   int flag;
@@ -246,18 +237,18 @@ struct wdata
   double api_rate;
 };
 
-struct wdata stat_out;
+struct StatData stat_out;
 
 pthread_mutex_t smutex = PTHREAD_MUTEX_INITIALIZER; 
-static void *writeTest(void *methon)
+static void *writeTest(void *pmethon)
 {
-  struct wdata *ps = ((struct wdata *)&stat_out);
-  int flag = ((struct wdata *)methon)->flag;
+  struct StatData *ps = ((struct StatData *)&stat_out);
+  int flag = ((struct StatData *)pmethon)->flag;
   double rate = 0;
   sleep(1);
   pthread_t pid = pthread_self();
   // pthread_detach(pid);
-  pid = ((struct wdata *)methon)->ind;
+  pid = ((struct StatData *)pmethon)->ind;
   // printf("local pid: %u\n", pid);
   
   if (flag == MFile) {
@@ -287,15 +278,15 @@ static void *writeTest(void *methon)
 }
 
 
-static void *readTest(void *methon)
+static void *readTest(void *pmethon)
 {
-  struct wdata *ps = ((struct wdata *)&stat_out);
-  int flag = ((struct wdata *)methon)->flag;
+  struct StatData *ps = ((struct StatData *)&stat_out);
+  int flag = ((struct StatData *)pmethon)->flag;
   double rate = 0;
   sleep(1);
   pthread_t pid = pthread_self();
   // pthread_detach(pid);
-  pid = ((struct wdata *)methon)->ind;
+  pid = ((struct StatData *)pmethon)->ind;
   // printf("local pid: %u\n", pid);
   
   if (flag == MFile) {
@@ -431,7 +422,7 @@ int main(int argc, char **argv)
     pcall = readTest;
   }
 
-  struct wdata local[mutinum];
+  struct StatData local[mutinum];
     
   for(i = 0; i< mutinum; i++) {
     local[i].flag = flag;   
