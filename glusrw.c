@@ -396,7 +396,7 @@ int main(int argc, char **argv)
   fsapi = glfs_new(volname);
   if (!fsapi) {
       fprintf (stderr, "glfs_new: returned NULL\n");
-      return ;
+      return 0;
   }
   ret = glfs_set_volfile_server (fsapi, "tcp", hostname, 24007);
   assert(ret >= 0); 
