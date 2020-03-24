@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/code/gsapi-demo/gsapi_demo/build",
+  "command": "/usr/bin/cc   -g -I/usr/local/include/glusterfs -I/home/code/gsapi-demo/gsapi_demo/include    -o CMakeFiles/apidemo.dir/glusrw.c.o   -c /home/code/gsapi-demo/gsapi_demo/glusrw.c",
+  "file": "/home/code/gsapi-demo/gsapi_demo/glusrw.c"
+}
+]

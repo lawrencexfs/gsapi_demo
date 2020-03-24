@@ -21,6 +21,7 @@
 // using namespace std;
 
 #define  NameSize (1024)
+int g_nRule = 0;
 int g_nTime = 5;
 const int WriteMode = 0;
 const int ReadMode = 1;
@@ -241,7 +242,9 @@ static void *writeTest(void *pmethon)
   sleep(1);
   pthread_t pid = pthread_self();
   // pthread_detach(pid);
-  pid = ((struct StatData *)pmethon)->ind;
+  if(g_nRule == 0){
+    pid = ((struct StatData *)pmethon)->ind;
+  }
   // printf("local pid: %u\n", pid);
   
   if (flag == MFile) {
@@ -278,7 +281,9 @@ static void *readTest(void *pmethon)
   sleep(1);
   pthread_t pid = pthread_self();
   // pthread_detach(pid);
-  pid = ((struct StatData *)pmethon)->ind;
+  if(g_nRule == 0){
+    pid = ((struct StatData *)pmethon)->ind;
+  }
   // printf("local pid: %u\n", pid);
   
   if (flag == MFile) {
@@ -374,6 +379,12 @@ int main(int argc, char **argv)
       stat_out.flag = flag;
       printf("method: %d\n", curMethon);
     }
+    else if(!strcmp("--namerule", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        g_nRule = atoi(argv[arg++]);
+      printf("namerule: %d\n", g_nRule);
+    }
     else {
       puts("Usage: glusrw [option]\n"
            " --mode [r or w]\n"
@@ -383,6 +394,7 @@ int main(int argc, char **argv)
            " --times [times](call write times)"
            " --concurrency [concurrency](muti limit 50)\n"
            " --method [method](0 all 1 mount 2 api )\n"
+           " --namerule [namerule](0 index inc , not 0 set pthread id )\n"
            " for examples...  ./glusrw --mode w --volname test1 --hostname node1 --size 200 --times 10 --concurrency 1 --method 0");
       return 0;
     }
