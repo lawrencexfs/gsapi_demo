@@ -24,7 +24,10 @@
 #define WRITE_FILE
 
 #define  NameSize (1024)
-int nTime = 5;
+int g_nTime = 5;
+const int WriteMode = 0;
+const int ReadMode = 1;
+glfs_t    *fsapi = NULL;
 
 /****************************************************************
 * 功能: diffTime 返回两者时间戳之差 单位 us 
@@ -44,7 +47,7 @@ double writeFile(int wsize, unsigned long fid);
 * ************************************************************/
 double writeApi(int wsize, unsigned long fid);
 
-int size = 500; //默认 文件大小 500 KB 
+int g_nsize = 500; //默认 文件大小 500 KB 
 static const char *pidname = ".glusrw.pid";
 static const char *volname = "test";
 static const char *hostname = "192.168.11.6";
@@ -67,14 +70,14 @@ double writeFile(int wsize, unsigned long fid)
     gettimeofday(&struStart, NULL);
     fd = open(combineName, O_CREAT | O_RDWR, 0644);
 
-    for (i=0; i < nTime; i++)
+    for (i=0; i < g_nTime; i++)
     {
         write(fd, strData, PageSize);
     }
 
     close(fd);
     gettimeofday(&struStop, NULL);
-    double rate = wsize * nTime;
+    double rate = wsize * g_nTime;
     rate = (rate ) / diffTime(struStop, struStart);
     printf("writeFile:\t %.3lf (clock time), using mount\n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
         (double)(clock()-ulStart)/CLOCKS_PER_SEC,
@@ -99,18 +102,18 @@ double readFile(int wsize, unsigned long fid)
     gettimeofday(&struStart, NULL);
     fd = open(combineName, O_CREAT | O_RDWR, 0644);
 
-    for (i=0; i < nTime; i++)
+    for (i=0; i < g_nTime; i++)
     {
         int ret = read(fd, strData, PageSize);
         if (ret <= 0){
-          nTime = i;
+          g_nTime = i;
           break;          
         }
     }
 
     close(fd);
     gettimeofday(&struStop, NULL);
-    double rate = wsize * nTime;
+    double rate = wsize * g_nTime;
     rate = (rate ) / diffTime(struStop, struStart);
     printf("readFile:\t %.3lf (clock time), using mount\n all time diff:   %.3lf\n read rate %.3lf KB/s\n\n", 
         (double)(clock()-ulStart)/CLOCKS_PER_SEC,
@@ -118,10 +121,6 @@ double readFile(int wsize, unsigned long fid)
         rate);
     return rate;
 }
-
-const int WriteMode = 0;
-const int ReadMode = 1;
-glfs_t    *fsapi = NULL;
 
 double writeApi(int wsize, unsigned long fid)
 {  
@@ -164,7 +163,7 @@ double writeApi(int wsize, unsigned long fid)
     // fd2 = glfs_open (fsapi, combineName, O_RDWR);
     // fprintf (stderr, "%s: (%p) %s\n", combineName, fd, strerror (errno));
 
-    for (i=0; i < nTime; i++)
+    for (i=0; i < g_nTime; i++)
     {
         ret = glfs_write (fd, writebuf, PageSize, 0);
     }
@@ -179,7 +178,7 @@ double writeApi(int wsize, unsigned long fid)
     // /* Gluster环境释放 */
     // glfs_fini (fsapi);
     gettimeofday(&struStop, NULL);
-    double rate = wsize * nTime;
+    double rate = wsize * g_nTime;
     rate = (rate ) / diffTime(struStop, struStart);
     printf("writeApi:\t %.3lf (clock time), using gsapi \n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
         (double)(clock()-ulStart)/CLOCKS_PER_SEC,
@@ -212,18 +211,18 @@ double readApi(int wsize, unsigned long fid)
     fprintf (stderr, "%s: (%p) %s\n", combineName, fd, strerror (errno));
     glfs_lseek (fd, 0, SEEK_SET);
  
-    for (i=0; i < nTime; i++)
+    for (i=0; i < g_nTime; i++)
     {
         ret = glfs_read (fd, writebuf, PageSize, 0);
         if (ret <= 0){
-          nTime = i;
+          g_nTime = i;
           break;          
         }
     }
     glfs_close (fd);
 
     gettimeofday(&struStop, NULL);
-    double rate = wsize * nTime;
+    double rate = wsize * g_nTime;
     rate = (rate ) / diffTime(struStop, struStart);
     printf("writeApi:\t %.3lf (clock time), using gsapi \n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
         (double)(clock()-ulStart)/CLOCKS_PER_SEC,
@@ -263,23 +262,23 @@ static void *writeTest(void *methon)
   
   if (flag == MFile) {
     printf("writeFile method: %d ... local pid: %u\n", flag, pid);
-    rate = writeFile(size, pid);
+    rate = writeFile(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else if (flag == MApi) {
     printf("writeApi method: %d ... local pid: %u\n", flag, pid);
-    rate = writeApi(size, pid);
+    rate = writeApi(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else {
     printf("all in comparison . method: %d ... local pid: %u\n", flag, pid);
-    rate = writeFile(size, pid);
+    rate = writeFile(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex); 
-    rate = writeApi(size, pid);
+    rate = writeApi(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
@@ -301,23 +300,23 @@ static void *readTest(void *methon)
   
   if (flag == MFile) {
     printf("readFile method: %d ... local pid: %u\n", flag, pid);
-    rate = readFile(size, pid);
+    rate = readFile(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else if (flag == MApi) {
     printf("readApi method: %d ... local pid: %u\n", flag, pid);
-    rate = readApi(size, pid);
+    rate = readApi(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else {
     printf("all in comparison . method: %d ... local pid: %u\n", flag, pid);
-    rate = readFile(size, pid);
+    rate = readFile(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex); 
-    rate = readApi(size, pid);
+    rate = readApi(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
@@ -369,14 +368,14 @@ int main(int argc, char **argv)
     else if(!strcmp("--size", argv[arg])) {
       arg++;
       if(argc>arg)
-        size = atoi(argv[arg++]);
-      printf("size: %d\n", size);
+        g_nsize = atoi(argv[arg++]);
+      printf("size: %d\n", g_nsize);
     }
     else if(!strcmp("--times", argv[arg])) {
       arg++;
       if(argc>arg)
-        nTime = atoi(argv[arg++]);
-      printf("times: %d\n", nTime);
+        g_nTime = atoi(argv[arg++]);
+      printf("times: %d\n", g_nTime);
     }
     else if(!strcmp("--concurrency", argv[arg])) {
       arg++;
@@ -455,7 +454,7 @@ int main(int argc, char **argv)
   printf("total rate file： %.3lf MB/s\n", stat_out.file_rate/1024);
   printf("total rate gapi： %.3lf MB/s\n", stat_out.api_rate/1024);
   glfs_fini (fsapi);
-  printf("total buffer size： %d MB\n", size*nTime/1024);
+  printf("total buffer size： %d MB\n", g_nsize*g_nTime/1024);
 
   return result;
 }
