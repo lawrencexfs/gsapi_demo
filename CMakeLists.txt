@@ -6,7 +6,6 @@ PROJECT(apidemo)
 
 #3.head file path，头文件目录
 INCLUDE_DIRECTORIES(
-/usr/local/include/glusterfs/
 include
 )
 
