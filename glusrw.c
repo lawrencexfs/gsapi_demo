@@ -15,8 +15,8 @@
 #include <sys/time.h>
 
 #include <errno.h>
-#include "api/glfs.h"
-#include "api/glfs-handles.h"
+#include "glusterfs/api/glfs.h"
+#include "glusterfs/api/glfs-handles.h"
 #include <pthread.h>
 // using namespace std;
 

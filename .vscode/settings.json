@@ -8,6 +8,8 @@
         "time.h": "c",
         "unistd.h": "c",
         "stdio.h": "c",
-        "pthread.h": "c"
+        "pthread.h": "c",
+        "glfs.h": "c",
+        "glfs-handles.h": "c"
     }
 }

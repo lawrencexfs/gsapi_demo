@@ -9,6 +9,8 @@
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
+                "-lpthread",
+                "-lgfapi",
                 "-I /usr/local/include/ -I /usr/include/ -L /usr/lib64/ -L /usr/lib/"
             ],
             "options": {
