@@ -22,7 +22,7 @@
 
 #define  NameSize (1024)
 int g_nRule = 0;
-int g_nTime = 5;
+int g_nTime = 10;
 const int WriteMode = 0;
 const int ReadMode = 1;
 glfs_t    *fsapi = NULL;
@@ -45,10 +45,10 @@ double writeFile(int wsize, unsigned long fid);
 * ************************************************************/
 double writeApi(int wsize, unsigned long fid);
 
-int g_nsize = 500; //默认 文件大小 500 KB 
+int g_nsize = 10240; //默认 文件大小 500 KB 
 static const char *pidname = ".glusrw.pid";
-static const char *volname = "test";
-static const char *hostname = "192.168.11.6";
+static const char *volname = "tc1";
+static const char *hostname = "192.168.2.243";
 static const char *wfilename = "/share/";
 char localhost[NameSize] = {0};
 
@@ -317,7 +317,8 @@ static void *readTest(void *pmethon)
 int getLocalHost();
 int main(int argc, char **argv)
 {
-  int curMethon;
+  int curMethon = 2;
+  stat_out.flag = curMethon;
 
   ssize_t n = 0;
   int arg = 1;

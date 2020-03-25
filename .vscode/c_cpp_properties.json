@@ -14,7 +14,8 @@
             "intelliSenseMode": "gcc-x64",
             "compilerArgs": [
                 "-I /usr/local/include/ -I /usr/include/ -L /usr/lib64/ -L /usr/lib/"
-            ]
+            ],
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4
