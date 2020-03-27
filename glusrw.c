@@ -452,7 +452,7 @@ int main(int argc, char **argv)
   printf("total rate gapi： %.3lf MB/s\n", stat_out.api_rate/1024);
   glfs_fini (fsapi);
   printf("total buffer size： %d MB\n", g_nsize*g_nTime/1024);
-
+  pthread_mutex_destroy(&smutex);
   return result;
 }
 

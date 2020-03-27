@@ -11,5 +11,6 @@
         "pthread.h": "c",
         "glfs.h": "c",
         "glfs-handles.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

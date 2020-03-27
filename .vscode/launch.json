@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/glusrw",
-            "args": [],
+            "args": ["--size", "2048"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
