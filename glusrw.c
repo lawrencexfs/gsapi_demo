@@ -444,6 +444,8 @@ int main(int argc, char **argv)
 
   int ind = 0;
   for (; ind < g_nRepeat; ind++){
+    stat_out.api_rate = 0;
+    stat_out.file_rate = 0;
     for(i = 0; i< mutinum; i++) {
       local[i].flag = flag;   
       local[i].ind = i;
