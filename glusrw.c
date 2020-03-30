@@ -31,7 +31,7 @@ unsigned int g_nRepeat = 1;
 const int WriteMode = 0;
 const int ReadMode = 1;
 glfs_t    *fsapi = NULL;
-
+int gInd = 0;
 /****************************************************************
 * 功能: diffTime 返回两者时间戳之差 单位 us 
 * ************************************************************/
@@ -255,23 +255,23 @@ static void *writeTest(void *pmethon)
 
 if (flag == MFile) {
     fprintf(pOut, "writeFile method: %d ... local pid: %u\n", flag, pid);
-    rate = writeFile(g_nsize, pid);
+    rate = writeFile(g_nsize, pid + gInd);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else if (flag == MApi) {
     fprintf(pOut, "writeApi method: %d ... local pid: %u\n", flag, pid);
-    rate = writeApi(g_nsize, pid);
+    rate = writeApi(g_nsize, pid + gInd);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else {
     fprintf(pOut, "all in comparison . method: %d ... local pid: %u\n", flag, pid);
-    rate = writeFile(g_nsize, pid);
+    rate = writeFile(g_nsize, pid + gInd);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex); 
-    rate = writeApi(g_nsize, pid);
+    rate = writeApi(g_nsize, pid + gInd);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
@@ -294,23 +294,23 @@ static void *readTest(void *pmethon)
   
   if (flag == MFile) {
     fprintf(pOut, "readFile method: %d ... local pid: %u\n", flag, pid);
-    rate = readFile(g_nsize, pid);
+    rate = readFile(g_nsize, pid + gInd);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else if (flag == MApi) {
     fprintf(pOut, "readApi method: %d ... local pid: %u\n", flag, pid);
-    rate = readApi(g_nsize, pid);
+    rate = readApi(g_nsize, pid + gInd);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else {
     fprintf(pOut, "all in comparison . method: %d ... local pid: %u\n", flag, pid);
-    rate = readFile(g_nsize, pid);
+    rate = readFile(g_nsize, pid + gInd);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex); 
-    rate = readApi(g_nsize, pid);
+    rate = readApi(g_nsize, pid + gInd);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
@@ -320,6 +320,7 @@ static void *readTest(void *pmethon)
 
 #define NUMT 4
 int getLocalHost();
+
 int main(int argc, char **argv)
 {
   int curMethon = 2;
@@ -444,6 +445,7 @@ int main(int argc, char **argv)
 
   int ind = 0;
   for (; ind < g_nRepeat; ind++){
+    gInd = ind;
     stat_out.api_rate = 0;
     stat_out.file_rate = 0;
     for(i = 0; i< mutinum; i++) {
@@ -456,7 +458,7 @@ int main(int argc, char **argv)
       if(0 != error)
         fprintf(pOut, "Couldn't run thread number %d, errno %d\n", local[i].ind, error);
       else
-        fprintf(pOut, "Thread %d, %ul\n", i, tid[i]);
+        fprintf(pOut, "Thread %d, %u\n", i, tid[i]);
     }
 
     /* now wait for all threads to terminate */
