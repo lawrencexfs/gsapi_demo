@@ -20,9 +20,14 @@
 #include <pthread.h>
 // using namespace std;
 
+// struct _IO_FILE *pOut = stderr;
+#define pOut stderr
+
 #define  NameSize (1024)
 int g_nRule = 0;
 int g_nTime = 10;
+unsigned int g_nRepeat = 1;
+
 const int WriteMode = 0;
 const int ReadMode = 1;
 glfs_t    *fsapi = NULL;
@@ -63,7 +68,7 @@ double writeFile(int wsize, unsigned long fid)
     char *strData = (char *)malloc(PageSize+1);
     char combineName[NameSize] = {0};
     sprintf(combineName, "%s%s/wmount.%u.%s",wfilename, volname, fid, localhost);
-    printf("writeFile filename: %s. size：%d KB.\n\n", combineName, wsize);
+    fprintf(pOut, "writeFile filename: %s. size：%d KB.\n\n", combineName, wsize);
     ulStart = clock();
     gettimeofday(&struStart, NULL);
     fd = open(combineName, O_CREAT | O_RDWR, 0644);
@@ -77,7 +82,7 @@ double writeFile(int wsize, unsigned long fid)
     gettimeofday(&struStop, NULL);
     double rate = wsize * g_nTime;
     rate = (rate ) / diffTime(struStop, struStart);
-    printf("writeFile:\t %.3lf (clock time), using mount\n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
+    fprintf(pOut, "writeFile:\t %.3lf (clock time), using mount\n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
         (double)(clock()-ulStart)/CLOCKS_PER_SEC,
         diffTime(struStop, struStart), 
         rate);
@@ -95,7 +100,7 @@ double readFile(int wsize, unsigned long fid)
     char *strData = (char *)malloc(PageSize+1);
     char combineName[NameSize] = {0};
     sprintf(combineName, "%s%s/wmount.%u.%s",wfilename, volname, fid, localhost);
-    printf("readFile filename: %s. size：%d KB.\n\n", combineName, wsize);
+    fprintf(pOut, "readFile filename: %s. size：%d KB.\n\n", combineName, wsize);
     ulStart = clock();
     gettimeofday(&struStart, NULL);
     fd = open(combineName, O_CREAT | O_RDWR, 0644);
@@ -111,7 +116,7 @@ double readFile(int wsize, unsigned long fid)
     gettimeofday(&struStop, NULL);
     double rate = wsize * g_nTime;
     rate = (rate ) / diffTime(struStop, struStart);
-    printf("readFile:\t %.3lf (clock time), using mount\n all time diff:   %.3lf\n read rate %.3lf KB/s\n\n", 
+    fprintf(pOut, "readFile:\t %.3lf (clock time), using mount\n all time diff:   %.3lf\n read rate %.3lf KB/s\n\n", 
         (double)(clock()-ulStart)/CLOCKS_PER_SEC,
         diffTime(struStop, struStart), 
         rate);
@@ -130,7 +135,7 @@ double writeApi(int wsize, unsigned long fid)
     char *writebuf = (char *)malloc(PageSize+1);
     char combineName[NameSize] = {0};
     sprintf(combineName, "%s.%u.%s",filename, fid, localhost);
-    printf("writeApi volname: %s%s. size：%d KB.\n\n", volname, combineName, wsize);
+    fprintf(pOut, "writeApi volname: %s%s. size：%d KB.\n\n", volname, combineName, wsize);
 
     unsigned long  ulStart;
     struct timeval struStart;
@@ -141,7 +146,7 @@ double writeApi(int wsize, unsigned long fid)
     //  /* 初始化gluster环境 */
     // fsapi = glfs_new(volname);
     // if (!fsapi) {
-    //     fprintf (stderr, "glfs_new: returned NULL\n");
+    //     fprintf (pOut, "glfs_new: returned NULL\n");
     //     return ;
     // }
     // ret = glfs_set_volfile_server (fsapi, "tcp", hostname, 24007);
@@ -149,12 +154,12 @@ double writeApi(int wsize, unsigned long fid)
     // ret = glfs_set_logging (fsapi, "/dev/stderr", 1);
     // assert(ret >= 0); 
     // ret = glfs_init (fsapi);
-    // fprintf (stderr, "glfs_init: returned %d\n", ret);
+    // fprintf (pOut, "glfs_init: returned %d\n", ret);
     // assert(ret >= 0);    
     /* 进行libgfapi函数调用 */
     fd = glfs_creat (fsapi, combineName, O_RDWR, 0644);
     assert(fd != NULL);
-    fprintf (stderr, "%s: (%p) %s\n", combineName, fd, strerror (errno));
+    fprintf(pOut, "%s: (%p) %s\n", combineName, fd, strerror (errno));
  
     for (i=0; i < g_nTime; i++)
     {
@@ -167,7 +172,7 @@ double writeApi(int wsize, unsigned long fid)
     gettimeofday(&struStop, NULL);
     double rate = wsize * g_nTime;
     rate = (rate ) / diffTime(struStop, struStart);
-    printf("writeApi:\t %.3lf (clock time), using gsapi \n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
+    fprintf(pOut, "writeApi:\t %.3lf (clock time), using gsapi \n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
         (double)(clock()-ulStart)/CLOCKS_PER_SEC,
         diffTime(struStop, struStart), 
         rate);
@@ -195,7 +200,7 @@ double readApi(int wsize, unsigned long fid)
 
     fd = glfs_open (fsapi, combineName, O_RDWR);
     // assert(fd != NULL);
-    fprintf (stderr, "%s: (%p) %s\n", combineName, fd, strerror (errno));
+    fprintf(pOut, "%s: (%p) %s\n", combineName, fd, strerror (errno));
     glfs_lseek (fd, 0, SEEK_SET);
     for (i=0; i < g_nTime; i++)
     {
@@ -210,7 +215,7 @@ double readApi(int wsize, unsigned long fid)
     gettimeofday(&struStop, NULL);
     double rate = wsize * g_nTime;
     rate = (rate ) / diffTime(struStop, struStart);
-    printf("readApi:\t %.3lf (clock time), using gsapi \n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
+    fprintf(pOut, "readApi:\t %.3lf (clock time), using gsapi \n all time diff:   %.3lf\n write rate %.3lf KB/s\n\n", 
         (double)(clock()-ulStart)/CLOCKS_PER_SEC,
         diffTime(struStop, struStart), 
         rate);
@@ -247,21 +252,21 @@ static void *writeTest(void *pmethon)
     pid = ((struct StatData *)pmethon)->ind;
   }
   // printf("local pid: %u\n", pid);
-  
-  if (flag == MFile) {
-    printf("writeFile method: %d ... local pid: %u\n", flag, pid);
+
+if (flag == MFile) {
+    fprintf(pOut, "writeFile method: %d ... local pid: %u\n", flag, pid);
     rate = writeFile(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else if (flag == MApi) {
-    printf("writeApi method: %d ... local pid: %u\n", flag, pid);
+    fprintf(pOut, "writeApi method: %d ... local pid: %u\n", flag, pid);
     rate = writeApi(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else {
-    printf("all in comparison . method: %d ... local pid: %u\n", flag, pid);
+    fprintf(pOut, "all in comparison . method: %d ... local pid: %u\n", flag, pid);
     rate = writeFile(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
@@ -288,19 +293,19 @@ static void *readTest(void *pmethon)
   // printf("local pid: %u\n", pid);
   
   if (flag == MFile) {
-    printf("readFile method: %d ... local pid: %u\n", flag, pid);
+    fprintf(pOut, "readFile method: %d ... local pid: %u\n", flag, pid);
     rate = readFile(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else if (flag == MApi) {
-    printf("readApi method: %d ... local pid: %u\n", flag, pid);
+    fprintf(pOut, "readApi method: %d ... local pid: %u\n", flag, pid);
     rate = readApi(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->api_rate += rate;
     pthread_mutex_unlock(&smutex);  
   }else {
-    printf("all in comparison . method: %d ... local pid: %u\n", flag, pid);
+    fprintf(pOut, "all in comparison . method: %d ... local pid: %u\n", flag, pid);
     rate = readFile(g_nsize, pid);
     pthread_mutex_lock(&smutex);  
     ps->file_rate += rate;
@@ -387,6 +392,12 @@ int main(int argc, char **argv)
         g_nRule = atoi(argv[arg++]);
       printf("namerule: %d\n", g_nRule);
     }
+    else if(!strcmp("--repeat", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        g_nRepeat = atoi(argv[arg++]);
+      printf("repeat: %d\n", g_nRepeat);
+    }
     else {
       puts("Usage: glusrw [option]\n"
            " --mode [r or w]\n"
@@ -396,8 +407,9 @@ int main(int argc, char **argv)
            " --times [times](call write times)"
            " --concurrency [concurrency](muti limit 50)\n"
            " --method [method](0 all 1 mount 2 api )\n"
-           " --namerule [namerule](0 index inc , not 0 set pthread id )\n"
-           " for examples...  ./glusrw --mode w --volname test1 --hostname node1 --size 200 --times 10 --concurrency 1 --method 0");
+           " --namerule [namerule](default 0 index inc , not 0 set pthread id )\n"
+           " --repeat [repeat](default 1, execute task cycle )\n"
+           " for examples...  ./glusrw --mode w --volname test1 --hostname node1 --size 200 --times 10 --concurrency 1 --method 0 --namerule 0 --repeat 1");
       return 0;
     }
   }
@@ -409,7 +421,7 @@ int main(int argc, char **argv)
     /* 初始化gluster环境 */
   fsapi = glfs_new(volname);
   if (!fsapi) {
-      fprintf (stderr, "glfs_new: returned NULL\n");
+      fprintf (pOut, "glfs_new: returned NULL\n");
       return 0;
   }
   ret = glfs_set_volfile_server (fsapi, "tcp", hostname, 24007);
@@ -417,7 +429,7 @@ int main(int argc, char **argv)
   ret = glfs_set_logging (fsapi, "/dev/stderr", 1);
   assert(ret >= 0); 
   ret = glfs_init (fsapi);
-  fprintf (stderr, "glfs_init: returned %d\n", ret);
+  fprintf (pOut, "glfs_init: returned %d\n\n\n", ret);
   assert(ret >= 0);    
   stat_out.api_rate = 0;
   stat_out.file_rate = 0;
@@ -429,27 +441,37 @@ int main(int argc, char **argv)
   }
 
   struct StatData local[mutinum];
-    
-  for(i = 0; i< mutinum; i++) {
-    local[i].flag = flag;   
-    local[i].ind = i;
-    int error = pthread_create(&tid[i],
-                               NULL, /* default attributes please */
-                               pcall,
-                               (void *)(&local[i]));
-    if(0 != error)
-      fprintf(stderr, "Couldn't run thread number %d, errno %d\n", local[i].ind, error);
-    else
-      fprintf(stderr, "Thread %d, %ul\n", i, tid[i]);
-  }
 
-  /* now wait for all threads to terminate */
-  for(i = 0; i< mutinum; i++) {
-    pthread_join(tid[i], NULL);
-    fprintf(stderr, "Thread %d terminated\n", i);
+  int ind = 0;
+  for (; ind < g_nRepeat; ind++){
+    for(i = 0; i< mutinum; i++) {
+      local[i].flag = flag;   
+      local[i].ind = i;
+      int error = pthread_create(&tid[i],
+                                NULL, /* default attributes please */
+                                pcall,
+                                (void *)(&local[i]));
+      if(0 != error)
+        fprintf(pOut, "Couldn't run thread number %d, errno %d\n", local[i].ind, error);
+      else
+        fprintf(pOut, "Thread %d, %ul\n", i, tid[i]);
+    }
+
+    /* now wait for all threads to terminate */
+    for(i = 0; i< mutinum; i++) {
+      pthread_join(tid[i], NULL);
+      fprintf(pOut, "Thread %d terminated\n", i);
+    }
+    printf("total rate file： %.3lf MB/s\n", stat_out.file_rate/1024);
+    printf("total rate gapi： %.3lf MB/s\n\n\n", stat_out.api_rate/1024);
+    // sleep(1);
   }
-  printf("total rate file： %.3lf MB/s\n", stat_out.file_rate/1024);
-  printf("total rate gapi： %.3lf MB/s\n", stat_out.api_rate/1024);
+  // int ind = 0;
+  // for (; ind < g_nRepeat; ind++){
+  //     printf("total rate file： %.3lf MB/s\n", stat_out.file_rate[ind]/1024);
+  //     printf("total rate gapi： %.3lf MB/s\n", stat_out.api_rate[ind]/1024);
+  // }
+
   glfs_fini (fsapi);
   printf("total buffer size： %d MB\n", g_nsize*g_nTime/1024);
   pthread_mutex_destroy(&smutex);
@@ -459,7 +481,7 @@ int main(int argc, char **argv)
 int getLocalHost(){
     FILE *fp;
     char cmd[NameSize] = {0};
-    char *fmt = "hostname";
+    const char *fmt = "hostname";
   
     snprintf(cmd, sizeof(cmd), fmt);
     if((fp = popen(cmd, "r")) == NULL)

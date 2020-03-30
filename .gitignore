@@ -40,3 +40,4 @@ build/CMakeFiles/gsapi_demo.dir/glusrw.c.o
 build/CMakeFiles/gsapi_demo.dir/link.txt
 build/CMakeFiles/gsapi_demo.dir/progress.make
 build/compile_commands.json
+*.cb
