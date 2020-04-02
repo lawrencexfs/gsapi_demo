@@ -10,7 +10,8 @@
         "stdio.h": "c",
         "pthread.h": "c",
         "glfs.h": "c",
-        "glfs-handles.h": "c"
+        "glfs-handles.h": "c",
+        "cstdlib": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
