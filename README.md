@@ -16,3 +16,9 @@ rm glusrw -f | gcc -o glusrw ./glusrw.c -L /usr/lib64/ -lgfapi -lpthread -I /usr
 >>远程连接gdb服务模式
 192.168.2.243:1233
 gdbserver 0.0.0.0:1233 /home/code/gsapi-demo/gsapi_demo/glusrw 
+
+# pro 项目型分支
+  git co -b pro
+  git push origin HEAD -u
+  rm glusrw -f | gcc -o glusrw ./file.c ./glusrw.c  -L /usr/lib64/ -lgfapi -lpthread -ggdb -I include
+  
